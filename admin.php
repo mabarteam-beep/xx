@@ -577,9 +577,11 @@ $selected_store_id = $_GET['store_id'] ?? '';
                         </div>
                     </div>
                 </div>
-                <div id="tab-cashflow" class="tab-content hidden">
+
+                <div id="tab-cashflow" class="tab-content">
                     <h2 class="text-2xl font-bold mb-6 text-gray-800">Manajemen Kas: Pemasukan & Pengeluaran</h2>
 
+                    <!-- Filter Form -->
                     <form id="filterFormCashflow"
                         class="bg-white p-5 rounded-xl shadow-md mb-8 flex flex-wrap gap-4 items-end">
                         <div class="w-full sm:w-auto">
@@ -622,8 +624,9 @@ $selected_store_id = $_GET['store_id'] ?? '';
                         </button>
                     </form>
 
+                    <!-- Action Buttons -->
                     <div class="flex justify-end gap-3 mb-6">
-                        <button onclick="showModal('modalCashflow', 'tambah')"
+                        <button onclick="showCashFlowModal()"
                             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md text-sm transition duration-200 flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -641,9 +644,11 @@ $selected_store_id = $_GET['store_id'] ?? '';
                         </button>
                     </div>
 
+                    <!-- Data Table -->
                     <div class="bg-white p-6 rounded-xl shadow-md">
                         <h3 class="text-lg font-bold mb-4 text-gray-800">Daftar Transaksi Kas</h3>
 
+                        <!-- Summary Cards -->
                         <div class="grid grid-cols-3 gap-4 mb-4 text-center">
                             <div class="p-3 bg-green-100 rounded-lg">
                                 <p class="text-sm text-green-700">Total Pemasukan</p>
@@ -659,6 +664,7 @@ $selected_store_id = $_GET['store_id'] ?? '';
                             </div>
                         </div>
 
+                        <!-- Table -->
                         <div class="overflow-x-auto">
                             <table class="min-w-full border-collapse divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -691,68 +697,167 @@ $selected_store_id = $_GET['store_id'] ?? '';
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
 
-
+                    <!-- 💰 Modal Cashflow -->
                     <div id="modalCashflow"
                         class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-                        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white z-60">
-                            <div class="mt-3 text-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modalCashflowTitle">Tambah
-                                    Transaksi Kas</h3>
-                                <div class="mt-2 px-7 py-3">
-                                    <form id="cashflowForm">
+                        <div class="relative top-10 mx-auto p-4 w-full max-w-md">
+                            <div class="bg-white rounded-lg shadow-xl">
+                                <!-- Header -->
+                                <div class="px-6 py-4 border-b border-gray-200">
+                                    <h3 class="text-lg font-semibold text-gray-900" id="modalCashflowTitle">
+                                        Tambah Transaksi Kas
+                                    </h3>
+                                </div>
+
+                                <!-- Form Content -->
+                                <div class="px-6 py-4">
+                                    <form id="cashflowForm" method="POST" action="api.php">
                                         <input type="hidden" id="cashflow_id" name="id">
 
+                                        <!-- 🗓️ Tanggal -->
                                         <div class="mb-4">
                                             <label for="cashflow_date"
-                                                class="block text-sm font-medium text-gray-700 text-left">Tanggal</label>
+                                                class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
                                             <input type="date" id="cashflow_date" name="tanggal" required
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                         </div>
 
-                                        <div class="mb-4">
+                                        <!-- 🏪 Store -->
+                                        <div  id="storeSelectContainer" class="mb-4">
                                             <label for="cashflow_store_id"
-                                                class="block text-sm font-medium text-gray-700 text-left">Store</label>
+                                                class="block text-sm font-medium text-gray-700 mb-1">Store</label>
                                             <select id="cashflow_store_id" name="store_id" required
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                                <option value="">Pilih Store</option>
+                                                <?php
+                                require_once 'config.php';
+                                $stores = $pdo->query('SELECT id, store_name FROM stores')->fetchAll();
+                                foreach ($stores as $s) {
+                                    echo "<option value='{$s['id']}'>" . htmlspecialchars($s['store_name']) . "</option>";
+                                }
+                                ?>
                                             </select>
                                         </div>
 
+                                        <!-- 💸 Jenis Transaksi -->
                                         <div class="mb-4">
                                             <label for="cashflow_type"
-                                                class="block text-sm font-medium text-gray-700 text-left">Jenis
+                                                class="block text-sm font-medium text-gray-700 mb-1">Jenis
                                                 Transaksi</label>
                                             <select id="cashflow_type" name="type" required
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                                 <option value="pemasukan">Pemasukan</option>
                                                 <option value="pengeluaran">Pengeluaran</option>
                                             </select>
                                         </div>
 
+                                        <!-- 🧾 Kategori -->
+                                        <div class="mb-4">
+                                            <label for="cashflow_category"
+                                                class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                                            <select id="cashflow_category" name="category" required
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                                <option value="">-- Pilih Kategori --</option>
+                                                <option value="bbm">BBM</option>
+                                                <option value="operasional">Operasional</option>
+                                                <option value="penjualan">Penjualan</option>
+                                                <option value="gaji">Gaji</option>
+                                                <option value="lainnya">Lainnya</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- 📝 Deskripsi -->
                                         <div class="mb-4">
                                             <label for="cashflow_description"
-                                                class="block text-sm font-medium text-gray-700 text-left">Deskripsi</label>
+                                                class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                                             <input type="text" id="cashflow_description" name="description" required
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="Masukkan deskripsi transaksi">
                                         </div>
 
+                                        <!-- 💰 Nominal -->
                                         <div class="mb-4">
                                             <label for="cashflow_amount"
-                                                class="block text-sm font-medium text-gray-700 text-left">Nominal
+                                                class="block text-sm font-medium text-gray-700 mb-1">Nominal
                                                 (Rp)</label>
                                             <input type="number" id="cashflow_amount" name="amount" required min="1"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="0">
                                         </div>
 
-                                        <div class="flex justify-center gap-4 mt-4">
+                                        <!-- 🛢️ SIMULATOR BBM -->
+                                        <div id="bbmSimulator" class="hidden border-t border-gray-200 pt-4 mt-4">
+                                            <h4
+                                                class="text-md font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                                    </path>
+                                                </svg>
+                                                Simulasi Pembelian BBM
+                                            </h4>
+
+                                            <div class="space-y-3">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga
+                                                        per Drigen (Rp)</label>
+                                                    <input type="number" id="bbm_harga"
+                                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                        value="340000">
+                                                </div>
+
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Pajak
+                                                        per Drigen (Rp)</label>
+                                                    <input type="number" id="bbm_pajak"
+                                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                        value="12000">
+                                                </div>
+
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700 mb-2">Pilih Store:</p>
+                                                    <div id="storeCheckboxContainer"
+                                                        class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto p-2 border border-gray-200 rounded-md">
+                                                        <?php foreach ($stores as $store): ?>
+                                                        <label
+                                                            class="flex items-center gap-2 p-1 hover:bg-gray-50 rounded">
+                                                            <input type="checkbox" name="store_bbm[]"
+                                                                value="<?= $store['id'] ?>"
+                                                                class="store-check h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                                            <span class="text-sm text-gray-700">
+                                                                <?= htmlspecialchars($store['store_name']) ?>
+                                                            </span>
+                                                        </label>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+
+                                                <div id="storeInputs" class="hidden space-y-2"></div>
+
+                                                <div class="pt-2">
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Total
+                                                        Akhir (Rp)</label>
+                                                    <input type="number" id="bbm_total" name="bbm_total"
+                                                        class="w-full px-3 py-2 border border-gray-300 bg-gray-50 rounded-md font-semibold"
+                                                        readonly>
+                                                    <small id="bbm_info"
+                                                        class="text-xs text-gray-500 mt-1 block"></small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 🔘 Tombol Action -->
+                                        <div class="flex justify-end gap-3 pt-4 mt-6 border-t border-gray-200">
                                             <button type="button" onclick="hideModal('modalCashflow')"
-                                                class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                                                 Batal
                                             </button>
                                             <button type="submit"
-                                                class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                                                 id="cashflowSubmitBtn">
                                                 Simpan Transaksi
                                             </button>
@@ -2138,6 +2243,185 @@ $selected_store_id = $_GET['store_id'] ?? '';
                 fetchDashboardData();
             }
         });
+    document.addEventListener("DOMContentLoaded", () => {
+    const categorySelect = document.getElementById("cashflow_category");
+    const storeSelectContainer = document.getElementById("storeSelectContainer");
+    const storeSelect = document.getElementById("cashflow_store_id");
+    const bbmSection = document.getElementById("bbmSimulator");
+    const storeContainer = document.getElementById("storeInputs");
+    const checkboxes = document.querySelectorAll(".store-check");
+    const hargaInput = document.getElementById("bbm_harga");
+    const pajakInput = document.getElementById("bbm_pajak");
+    const totalInput = document.getElementById("bbm_total");
+    const info = document.getElementById("bbm_info");
+    const nominalField = document.getElementById("cashflow_amount");
+
+    let isManualEdit = false;
+
+    // tampilkan / sembunyikan simulator dan store select
+    categorySelect.addEventListener("change", () => {
+        if (categorySelect.value === "bbm") {
+            bbmSection.classList.remove("hidden");
+            storeSelectContainer.classList.add("hidden"); // HILANGKAN store select
+            storeSelect.removeAttribute("required");
+            storeSelect.value = ""; // Reset value
+            
+            // Reset semua checkbox ketika pilih BBM
+            checkboxes.forEach(cb => cb.checked = false);
+            storeContainer.innerHTML = "";
+            totalInput.value = "";
+            nominalField.value = "";
+            resetStorePercentages();
+            isManualEdit = false;
+        } else {
+            bbmSection.classList.add("hidden");
+            storeSelectContainer.classList.remove("hidden"); // TAMPILKAN store select
+            storeSelect.setAttribute("required", "required");
+            
+            storeContainer.innerHTML = "";
+            totalInput.value = "";
+            nominalField.value = "";
+            resetStorePercentages();
+            isManualEdit = false;
+        }
+    });
+
+    // Event listener untuk edit manual nominal field
+    nominalField.addEventListener("input", () => {
+        if (categorySelect.value === "bbm") {
+            isManualEdit = true;
+            const manualValue = parseFloat(nominalField.value) || 0;
+            totalInput.value = manualValue;
+            updatePercentagesFromManual(manualValue);
+        }
+    });
+
+    // generate input jumlah drigen saat store dicentang
+    checkboxes.forEach(cb => {
+        cb.addEventListener("change", () => {
+            storeContainer.classList.toggle("hidden", ![...checkboxes].some(c => c.checked));
+
+            storeContainer.innerHTML = "";
+            checkboxes.forEach(box => {
+                if (box.checked) {
+                    const div = document.createElement("div");
+                    div.className = "grid grid-cols-2 gap-2";
+                    div.innerHTML = `
+                        <label class="text-sm font-medium">${box.nextElementSibling.textContent.split(' - ')[0]} (Drigen)</label>
+                        <input type="number" name="jumlah_drigen[${box.value}]" class="drigen-input border rounded p-1" min="0" value="0">
+                    `;
+                    storeContainer.appendChild(div);
+                }
+            });
+            
+            if ([...checkboxes].some(c => c.checked)) {
+                hitungBBM();
+            } else {
+                totalInput.value = "";
+                nominalField.value = "";
+                resetStorePercentages();
+            }
+        });
+    });
+
+    // fungsi hitung total BBM (otomatis dari drigen)
+    function hitungBBM() {
+        if (isManualEdit) return;
+
+        const harga = parseFloat(hargaInput.value) || 0;
+        const pajak = parseFloat(pajakInput.value) || 0;
+        const inputs = storeContainer.querySelectorAll(".drigen-input");
+
+        let totalDrigen = 0;
+        inputs.forEach(i => totalDrigen += parseFloat(i.value) || 0);
+        
+        if (totalDrigen === 0) {
+            totalInput.value = "";
+            nominalField.value = "";
+            info.textContent = "";
+            resetStorePercentages();
+            isManualEdit = false;
+            return;
+        }
+
+        const totalHarga = totalDrigen * (harga + pajak);
+        const pembulatan = Math.round(totalHarga / 100) * 100;
+        const selisih = pembulatan - totalHarga;
+        totalInput.value = pembulatan.toFixed(0);
+        nominalField.value = pembulatan.toFixed(0);
+
+        updateStorePercentages(inputs, totalDrigen, pembulatan);
+        info.textContent = `Pembulatan ${selisih >= 0 ? '+' : ''}${selisih.toFixed(0)} (dibagi proporsional antar store)`;
+        isManualEdit = false;
+    }
+
+    // Fungsi untuk update persentase ketika nominal di-edit manual
+    function updatePercentagesFromManual(manualNominal) {
+        const inputs = storeContainer.querySelectorAll(".drigen-input");
+        let totalDrigen = 0;
+        inputs.forEach(i => totalDrigen += parseFloat(i.value) || 0);
+
+        if (totalDrigen === 0) {
+            const checkedStores = [...checkboxes].filter(cb => cb.checked);
+            const equalShare = manualNominal / checkedStores.length;
+            
+            checkedStores.forEach(box => {
+                const storeText = box.nextElementSibling;
+                const persentase = (100 / checkedStores.length);
+                storeText.innerHTML = `
+                    ${storeText.textContent.split(' - ')[0]} 
+                    - ${persentase.toFixed(1)}% (Rp ${Math.round(equalShare).toLocaleString()})
+                `;
+            });
+            info.textContent = `Dibagi rata ke ${checkedStores.length} store`;
+        } else {
+            updateStorePercentages(inputs, totalDrigen, manualNominal);
+            info.textContent = `Manual input - proporsi berdasarkan jumlah drigen`;
+        }
+    }
+
+    // Fungsi untuk update persentase dan nominal di checkbox store
+    function updateStorePercentages(inputs, totalDrigen, totalNominal) {
+        checkboxes.forEach(box => {
+            if (box.checked) {
+                const storeId = box.value;
+                const input = Array.from(inputs).find(i => i.name.includes(storeId));
+                const drigen = parseFloat(input?.value) || 0;
+                const persentase = totalDrigen > 0 ? (drigen / totalDrigen * 100) : 0;
+                const nominal = totalNominal * (drigen / totalDrigen);
+                
+                const storeText = box.nextElementSibling;
+                const storeName = storeText.textContent.split(' - ')[0];
+                storeText.innerHTML = `
+                    ${storeName} 
+                    - ${persentase.toFixed(1)}% (Rp ${Math.round(nominal).toLocaleString()})
+                `;
+            }
+        });
+    }
+
+    // Fungsi untuk reset persentase
+    function resetStorePercentages() {
+        checkboxes.forEach(box => {
+            const storeText = box.nextElementSibling;
+            const originalText = storeText.textContent.split(' - ')[0];
+            storeText.textContent = originalText;
+        });
+    }
+
+    // Event listeners
+    [hargaInput, pajakInput].forEach(el => el.addEventListener("input", () => {
+        isManualEdit = false;
+        hitungBBM();
+    }));
+    
+    document.addEventListener("input", e => {
+        if (e.target.classList.contains("drigen-input")) {
+            isManualEdit = false;
+            hitungBBM();
+        }
+    });
+});
     </script>
 </body>
 
